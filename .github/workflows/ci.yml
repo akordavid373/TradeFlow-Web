@@ -1,0 +1,13 @@
+name: Web CI
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Security Audit
+        run: npm audit --audit-level=critical
+      - name: Verify Package Integrity
+        run: ls src/app/page.tsx
