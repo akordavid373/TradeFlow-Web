@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { connectWallet } from "../lib/stellar";
 import { PlusCircle, ShieldCheck, Landmark } from "lucide-react";
 import LoanTable from "../components/LoanTable";
 import SkeletonRow from "../components/SkeletonRow";
@@ -10,31 +9,19 @@ import Card from "../components/Card";
 import WalletModal from "../components/WalletModal";
 import InvoiceMintForm from "../components/InvoiceMintForm";
 import NewsBanner from "../components/NewsBanner";
+import Web3Status from "../components/Web3Status";
 import useTransactionToast from "../lib/useTransactionToast";
 import AddTrustlineButton from "../components/AddTrustlineButton";
 import ProModeSection from "../components/ProModeSection";
 import { formatCurrency, formatDate } from "../lib/format";
+import { useWalletAddress } from "../store/useWeb3Store";
 
 export default function Page() {
-  const [address, setAddress] = useState("");
+  const walletAddress = useWalletAddress();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showMintForm, setShowMintForm] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // 1. Connect Stellar Wallet (Freighter)
-  const handleConnectWallet = async () => {
-    try {
-      const userInfo = await connectWallet();
-      if (userInfo && userInfo.publicKey) {
-        setAddress(userInfo.publicKey);
-        console.log("Wallet connected:", userInfo.publicKey);
-      }
-    } catch (e: any) {
-      console.error("Connection failed:", e.message);
-      alert(e.message || "Failed to connect to Freighter wallet.");
-    }
-  };
 
   // 2. Fetch Invoices from your Repo 2 API
   const fetchInvoices = async () => {
@@ -72,12 +59,16 @@ export default function Page() {
 
       {/* Header */}
       <Navbar
-        address={address}
+        address={walletAddress || ""}
         onConnect={() => setIsModalOpen(true)}
       />
 
       {/* Main Content */}
       <div className="flex-1 px-8">
+        {/* Web3 Status Display */}
+        <div className="mb-8">
+          <Web3Status />
+        </div>
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <Card>
@@ -194,7 +185,6 @@ export default function Page() {
       <WalletModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConnect={handleConnectWallet}
       />
 
       <button
